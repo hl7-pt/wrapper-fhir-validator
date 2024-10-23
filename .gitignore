@@ -166,3 +166,4 @@ tmp/
 *.tgz
 validator_cli*.jar
 logs/
+.vscode/

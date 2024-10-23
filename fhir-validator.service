@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn instance to serve your Python application
+After=network.target
+
+[Service]
+User=jalmeida
+Group=www-data
+WorkingDirectory=/home/jalmeida/wrapper-fhir-validator
+ExecStart=/home/jalmeida/wrapper-fhir-validator/bin/gunicorn --workers 2 --bind 0.0.0.0:5006 run:app
+
+[Install]
+WantedBy=multi-user.target
+
