@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0"
+        crossorigin="anonymous"></script>
+
+
+        <style>
+            .container {
+                margin-top: 20px;
+            }
+    
+            #upload-form {
+                margin-top: 50px;
+                padding: 20px;
+
+            }
+            .warninglevel {
+              color:#e99425;  }
+  .errorlevel {
+    color: #F34e10;}
+  .informationlevel {
+    color:#6b6a68;}
+
+
+         
+    .inline-form {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        </style>
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+    <h1></h1>
+    
+    <div class="container">
+  <h1>Validador de recursos FHIR por IG</h1>
+  <br/>
+
+  <h3>Links e documentação</h3>
+  <ol>
+    
+    <li> Esta webapp é um wrapper à volta de  <a href="https://github.com/hapifhir/org.hl7.fhir.core">https://github.com/hapifhir/org.hl7.fhir.core</a></li>
+    <li> Mais informação <a href="https://confluence.hl7.org/display/FHIR/Using+the+FHIR+Validator#UsingtheFHIRValidator-Downloadingthevalidator">aqui</a></li>
+  </ol>
+
+  <h3>Cole o seu recurso</h3>
+  <form method="post" enctype="multipart/form-data">
+    
+    <!-- Checkbox for usePUT -->
+
+  
+      <!-- Text input for baseServer -->
+      <textarea id="serverBase" name="serverBase" rows="10" cols="100" required style="font-size: 16px;"></textarea>
+      <br><br>
+      <h3>Selecione IG ou faça upload do package.tgz</h3>
+
+    
+    <br/>
+    <label for="tgzFile">Upload ficheiro .tgz:</label>
+    <input type="file" id="tgzFile" name="tgzFile" accept=".tgz" required>
+    <br><br>
+    
+  
+      <label for="detailInput">Ou URL do IG caso esteja disponivel</label>
+      <input type="text" id="detailInput" name="detailInput">
+      <br><br>
+      <input type="submit" value="Submeter" id="upload-btn">
+  </form>
+<br>
+{% if result %}
+
+<div class="container-fluid">
+
+  
+  <table class="table">
+      <thead>
+      <tr>
+          <th scope="col">#</th>
+  
+          <th scope="col">Severidade</th>
+          <th scope="col">Código</th>
+  
+          <th scope="col">Detalhes</th>
+          <th scope="col">Fonte do diagnóstico</th>
+
+      </tr>
+      </thead>
+      <tbody>
+      {% for foo in result.issue %}
+      <tr  >
+          <th  scope="row">{{loop.index}}</th>
+  
+          <td class="{{foo["severity"]}}level">{{ foo["severity"] }}</td>
+          <td>{{ foo["code"] }}</td>
+          <td>{{ foo["details"]["text"] }}</td>
+          {% for item in  foo.extension %}
+    {% if item.url == 'http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source' %}
+    <td>  {{ item.valueString }}</td>
+  
+    {% endif %}
+{% endfor %}
+
+      </tr>
+      {% endfor %}
+      </tbody>
+  </table>
+  
+
+    </div>
+
+  <br>
+
+{% endif %}
+</div>  
+
+
+</body>
+
+<script>
+
+
+</script>
+
+</html>
+
+

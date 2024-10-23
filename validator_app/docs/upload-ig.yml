@@ -1,0 +1,56 @@
+
+  description: "endpoint for uploading/installing a HL7 FHIR IG in a server."
+  consumes:
+    - "application/json"
+  produces:
+    - "application/json"
+  parameters:
+    - in: "body"
+      name: "body"
+      description: "Parameters for uploading/installing a HL7 FHIR IG in a server."
+      required: true
+      schema:
+        $ref: "#/definitions/upload-ig"
+  responses:
+    404:
+      description: "No Content"
+  definitions:
+    upload-ig:
+      type: "object"
+      required:
+        - "serverBase"
+        - "packageId"
+        - "usePUT"
+        - "loadRecursively"
+        - "packagebase64"
+        - "packageURL"
+      properties:
+        serverBase:
+          type: "string"
+          description: URL of the server where the IG will be uploaded/installed.
+          required: true
+
+        packageId:
+          type: "string"
+          description: Package ID of the IG to be uploaded/installed. Must only be provided if no packagebase64 or packageURL is provided.
+
+
+        usePUT:
+          type: "boolean"
+          required: false
+          description: If true, the PUT method will be used to upload the IG. If false, the POST method will be used.
+
+        loadRecursively:
+          type: "boolean"
+          description: If true, the IGs dependency will be loaded recursively. If false, the IG will be loaded standalone.
+
+          required: false
+        packagebase64:
+          type: "string"
+          description: Package (.tgz) of the IG to be uploaded/installed in base64 format. Must only be provided if no packageId or packageURL is provided.
+
+        packageURL:
+          type: "string"
+          description: Location of the package (.tgz) of the IG to be uploaded/installed. Must only be provided if no packagebase64 or packageId is provided.
+
+
