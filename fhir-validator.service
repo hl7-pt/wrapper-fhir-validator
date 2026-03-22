@@ -1,12 +1,41 @@
+# fhir-validator.service
+#
+# Systemd unit file for the wrapper-fhir-validator application.
+#
+# Before installing, replace the following placeholders with values that match
+# your environment:
+#
+#   <APP_USER>   – OS user that will own the process (e.g. fhirvalidator)
+#   <APP_GROUP>  – OS group (e.g. www-data)
+#   <APP_DIR>    – Absolute path to the project directory
+#                  (e.g. /opt/wrapper-fhir-validator)
+#
+# Installation:
+#   sudo cp fhir-validator.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable fhir-validator
+#   sudo systemctl start fhir-validator
+
 [Unit]
-Description=Gunicorn instance to serve your Python application
+Description=Wrapper FHIR Validator – Gunicorn application server
 After=network.target
 
 [Service]
-User=jalmeida
-Group=www-data
-WorkingDirectory=/home/jalmeida/wrapper-fhir-validator
-ExecStart=/home/jalmeida/wrapper-fhir-validator/bin/gunicorn --workers 2 --bind 0.0.0.0:5006 run:app
+User=<APP_USER>
+Group=<APP_GROUP>
+WorkingDirectory=<APP_DIR>
+
+# Activate the virtual environment by pointing ExecStart at the Gunicorn binary
+# inside it.  The venv is created by setup.sh at <APP_DIR>/venv.
+ExecStart=<APP_DIR>/venv/bin/gunicorn --workers 2 --bind 0.0.0.0:5006 run:app
+
+# Restart the service automatically if it crashes
+Restart=on-failure
+RestartSec=5
+
+# Write stdout/stderr to the journal (view with: journalctl -u fhir-validator)
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
