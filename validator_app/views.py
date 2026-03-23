@@ -4,20 +4,18 @@ from flask import render_template, request, Blueprint
 from validator_app import app
 import subprocess
 import os
-import tempfile
 import json
 
 print(app.config)
 bp = Blueprint("burritos", __name__)
 
-temp_dir = tempfile.gettempdir()
-temp_dir = "/Users/joaoalmeida/Desktop/hl7pt/wrapper-fhir-validator/tmp"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+temp_dir = os.path.join(BASE_DIR, "tmp")
+os.makedirs(temp_dir, exist_ok=True)
 
 
 def validating_resource(file, ig, temp_folder):
-    jar_path = (
-        "/Users/joaoalmeida/Desktop/hl7pt/wrapper-fhir-validator/validator_cli.jar"
-    )
+    jar_path = os.path.join(BASE_DIR, "validator_cli.jar")
     if not os.path.isfile(jar_path):
         print(f"Error: The specified jar file does not exist at {jar_path}")
         return ""
