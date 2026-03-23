@@ -1,136 +1,717 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt">
 
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <title>Validador FHIR | HL7 Portugal</title>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0"
-        crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous">
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmTiJWM6UNVlHMCIZX1XyMkUqBKu"
+        crossorigin="anonymous" defer></script>
 
-        <style>
-            .container {
-                margin-top: 20px;
-            }
-    
-            #upload-form {
-                margin-top: 50px;
-                padding: 20px;
+    <style>
+        :root {
+            --fhir-primary: #0d6efd;
+            --fhir-primary-dark: #0a58ca;
+            --fhir-surface: #ffffff;
+            --fhir-bg: #f0f4f8;
+            --fhir-border: #dee2e6;
+            --fhir-radius: 12px;
+            --fhir-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --fhir-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+            --fhir-warning: #e99425;
+            --fhir-error: #dc3545;
+            --fhir-info: #6c757d;
+            --fhir-success: #198754;
+        }
 
-            }
-            .warninglevel {
-              color:#e99425;  }
-  .errorlevel {
-    color: #F34e10;}
-  .informationlevel {
-    color:#6b6a68;}
+        body {
+            background-color: var(--fhir-bg);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #212529;
+            min-height: 100vh;
+        }
 
+        /* ── Navbar ── */
+        .fhir-navbar {
+            background: linear-gradient(135deg, #0d1b2a 0%, #1a3a5c 100%);
+            padding: 0.85rem 1.5rem;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+        }
+        .fhir-navbar .brand-text {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0.02em;
+        }
+        .fhir-navbar .brand-badge {
+            font-size: 0.7rem;
+            background: var(--fhir-primary);
+            color: #fff;
+            border-radius: 20px;
+            padding: 0.18em 0.65em;
+            vertical-align: middle;
+            margin-left: 0.45rem;
+            font-weight: 600;
+        }
 
-         
-    .inline-form {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
+        /* ── Page layout ── */
+        .page-wrapper {
+            max-width: 900px;
+            margin: 2.5rem auto;
+            padding: 0 1rem 3rem;
+        }
 
-        </style>
+        /* ── Cards ── */
+        .fhir-card {
+            background: var(--fhir-surface);
+            border: 1px solid var(--fhir-border);
+            border-radius: var(--fhir-radius);
+            box-shadow: var(--fhir-shadow);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        .fhir-card-header {
+            padding: 1.1rem 1.5rem;
+            background: #f8f9fb;
+            border-bottom: 1px solid var(--fhir-border);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .fhir-card-header .card-icon {
+            width: 34px;
+            height: 34px;
+            background: var(--fhir-primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .fhir-card-header .card-icon svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: #fff;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .fhir-card-header h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+            color: #1a2332;
+        }
+        .fhir-card-body {
+            padding: 1.5rem;
+        }
+
+        /* ── Info links ── */
+        .info-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+        .info-links li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+        .info-links li::before {
+            content: "›";
+            color: var(--fhir-primary);
+            font-weight: 700;
+            font-size: 1.1rem;
+            line-height: 1.3;
+            flex-shrink: 0;
+        }
+        .info-links a {
+            color: var(--fhir-primary);
+            text-decoration: none;
+            word-break: break-all;
+        }
+        .info-links a:hover {
+            text-decoration: underline;
+        }
+
+        /* ── Form elements ── */
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #344054;
+            margin-bottom: 0.4rem;
+        }
+        .form-label .label-hint {
+            font-weight: 400;
+            color: #6c757d;
+        }
+
+        .fhir-textarea {
+            font-family: 'Cascadia Code', 'Fira Mono', 'Consolas', monospace;
+            font-size: 0.85rem;
+            border: 1.5px solid var(--fhir-border);
+            border-radius: 8px;
+            padding: 0.85rem 1rem;
+            width: 100%;
+            resize: vertical;
+            min-height: 200px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: #fafbfc;
+            color: #1a2332;
+        }
+        .fhir-textarea:focus {
+            outline: none;
+            border-color: var(--fhir-primary);
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.12);
+            background: #fff;
+        }
+
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+            color: #6c757d;
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .section-divider::before,
+        .section-divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--fhir-border);
+        }
+
+        /* File input */
+        .file-upload-wrapper {
+            position: relative;
+        }
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border: 1.5px dashed var(--fhir-border);
+            border-radius: 8px;
+            cursor: pointer;
+            background: #fafbfc;
+            transition: border-color 0.2s, background 0.2s;
+            font-size: 0.875rem;
+            color: #495057;
+        }
+        .file-upload-label:hover {
+            border-color: var(--fhir-primary);
+            background: #f0f7ff;
+        }
+        .file-upload-label svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            stroke: var(--fhir-primary);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        #tgzFile {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+        #file-name-display {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 0.35rem;
+            margin-left: 0.25rem;
+        }
+        #file-name-display.has-file {
+            color: var(--fhir-success);
+            font-weight: 500;
+        }
+
+        .or-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e9ecef;
+            color: #6c757d;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        .fhir-input {
+            border: 1.5px solid var(--fhir-border);
+            border-radius: 8px;
+            padding: 0.65rem 1rem;
+            font-size: 0.875rem;
+            width: 100%;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: #fafbfc;
+        }
+        .fhir-input:focus {
+            outline: none;
+            border-color: var(--fhir-primary);
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.12);
+            background: #fff;
+        }
+
+        /* Submit button */
+        .btn-fhir-submit {
+            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 0.7rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 3px 10px rgba(13, 110, 253, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 150px;
+            justify-content: center;
+        }
+        .btn-fhir-submit:hover:not(:disabled) {
+            opacity: 0.92;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 16px rgba(13, 110, 253, 0.35);
+        }
+        .btn-fhir-submit:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        .btn-fhir-submit:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .btn-fhir-submit svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+            border-width: 0.18em;
+        }
+
+        /* ── Results ── */
+        .results-summary {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.25rem;
+        }
+        .summary-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.3rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .pill-error   { background: #fde8e8; color: var(--fhir-error); }
+        .pill-warning { background: #fff3cd; color: #856404; }
+        .pill-info    { background: #e9ecef; color: var(--fhir-info); }
+
+        .results-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.875rem;
+        }
+        .results-table thead th {
+            background: #f8f9fb;
+            border-top: 1px solid var(--fhir-border);
+            border-bottom: 2px solid var(--fhir-border);
+            padding: 0.65rem 1rem;
+            font-weight: 600;
+            color: #344054;
+            white-space: nowrap;
+        }
+        .results-table thead th:first-child { border-left: 1px solid var(--fhir-border); border-radius: 8px 0 0 0; }
+        .results-table thead th:last-child  { border-right: 1px solid var(--fhir-border); border-radius: 0 8px 0 0; }
+        .results-table tbody tr {
+            transition: background 0.15s;
+        }
+        .results-table tbody tr:hover { background: #f8f9fb; }
+        .results-table tbody td {
+            padding: 0.7rem 1rem;
+            border-bottom: 1px solid #f0f2f5;
+            vertical-align: top;
+        }
+        .results-table tbody tr:last-child td { border-bottom: none; }
+        .results-table .row-num {
+            color: #adb5bd;
+            font-weight: 600;
+            width: 40px;
+            text-align: center;
+        }
+
+        /* Severity badges */
+        .severity-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.22rem 0.65rem;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .severity-badge svg {
+            width: 13px;
+            height: 13px;
+            flex-shrink: 0;
+        }
+        .badge-error       { background: #fde8e8; color: #b91c1c; }
+        .badge-warning     { background: #fff3cd; color: #92400e; }
+        .badge-information { background: #e9ecef; color: #495057; }
+        .badge-success     { background: #d1fae5; color: #065f46; }
+        .badge-fatal       { background: #fde8e8; color: #7f1d1d; border: 1px solid #fca5a5; }
+
+        .code-chip {
+            background: #f0f4f8;
+            border: 1px solid #dde3ea;
+            border-radius: 6px;
+            padding: 0.15rem 0.5rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #344054;
+        }
+        .source-text {
+            color: #6c757d;
+            font-size: 0.82rem;
+            font-family: monospace;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .page-wrapper { margin: 1rem auto; padding: 0 0.75rem 2rem; }
+            .fhir-card-body { padding: 1rem; }
+            .results-table { font-size: 0.8rem; }
+            .results-table thead th,
+            .results-table tbody td { padding: 0.5rem 0.65rem; }
+        }
+    </style>
 </head>
 
-<body class="d-flex flex-column min-vh-100">
-    <h1></h1>
-    
-    <div class="container">
-  <h1>Validador de recursos FHIR por IG</h1>
-  <br/>
+<body>
 
-  <h3>Links e documentação</h3>
-  <ol>
-    
-    <li> Esta webapp é um wrapper à volta de  <a href="https://github.com/hapifhir/org.hl7.fhir.core">https://github.com/hapifhir/org.hl7.fhir.core</a></li>
-    <li> Mais informação <a href="https://confluence.hl7.org/display/FHIR/Using+the+FHIR+Validator#UsingtheFHIRValidator-Downloadingthevalidator">aqui</a></li>
-  </ol>
+    <!-- Navbar -->
+    <nav class="fhir-navbar">
+        <span class="brand-text">
+            <!-- FHIR flame icon -->
+            <svg style="width:22px;height:22px;vertical-align:-5px;margin-right:6px" viewBox="0 0 24 24" fill="none" stroke="#ff7b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22c4.97 0 9-3.58 9-8 0-3-1.5-5.5-4-7 .5 2-1 4-3 5 0-2-1-4-3-6-1 3-4 5-4 8 0 .5.04 1 .1 1.5C5.8 17.5 4 15.5 4 13c0 5 3.58 9 8 9z"/>
+            </svg>
+            Validador FHIR
+            <span class="brand-badge">HL7 PT</span>
+        </span>
+    </nav>
 
-  <h3>Cole o seu recurso</h3>
-  <form method="post" enctype="multipart/form-data">
-    
-    <!-- Checkbox for usePUT -->
+    <div class="page-wrapper">
 
-  
-      <!-- Text input for baseServer -->
-      <textarea id="serverBase" name="serverBase" rows="10" cols="100" required style="font-size: 16px;"></textarea>
-      <br><br>
-      <h3>Selecione IG ou faça upload do package.tgz</h3>
+        <!-- Info card -->
+        <div class="fhir-card">
+            <div class="fhir-card-header">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                </div>
+                <h2>Sobre esta ferramenta</h2>
+            </div>
+            <div class="fhir-card-body">
+                <ul class="info-links">
+                    <li>Esta webapp é um wrapper à volta de
+                        <a href="https://github.com/hapifhir/org.hl7.fhir.core" target="_blank" rel="noopener">
+                            github.com/hapifhir/org.hl7.fhir.core
+                        </a>
+                    </li>
+                    <li>Mais informação disponível
+                        <a href="https://confluence.hl7.org/display/FHIR/Using+the+FHIR+Validator#UsingtheFHIRValidator-Downloadingthevalidator" target="_blank" rel="noopener">
+                            na documentação oficial do HL7
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
 
-    
-    <br/>
-    <label for="tgzFile">Upload ficheiro .tgz:</label>
-    <input type="file" id="tgzFile" name="tgzFile" accept=".tgz" required>
-    <br><br>
-    
-  
-      <label for="detailInput">Ou URL do IG caso esteja disponivel</label>
-      <input type="text" id="detailInput" name="detailInput">
-      <br><br>
-      <input type="submit" value="Submeter" id="upload-btn">
-  </form>
-<br>
-{% if result %}
+        <!-- Form card -->
+        <div class="fhir-card">
+            <div class="fhir-card-header">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <h2>Validar recurso FHIR</h2>
+            </div>
+            <div class="fhir-card-body">
+                <form method="post" enctype="multipart/form-data" id="validator-form" novalidate>
 
-<div class="container-fluid">
+                    <!-- Resource textarea -->
+                    <label class="form-label" for="serverBase">
+                        Recurso FHIR
+                        <span class="label-hint">— cole aqui o JSON ou XML do seu recurso</span>
+                    </label>
+                    <textarea
+                        id="serverBase"
+                        name="serverBase"
+                        class="fhir-textarea"
+                        rows="12"
+                        required
+                        placeholder='{
+  "resourceType": "Patient",
+  "id": "example",
+  ...
+}'></textarea>
 
-  
-  <table class="table">
-      <thead>
-      <tr>
-          <th scope="col">#</th>
-  
-          <th scope="col">Severidade</th>
-          <th scope="col">Código</th>
-  
-          <th scope="col">Detalhes</th>
-          <th scope="col">Fonte do diagnóstico</th>
+                    <!-- IG section divider -->
+                    <div class="section-divider">Guia de Implementação (IG)</div>
 
-      </tr>
-      </thead>
-      <tbody>
-      {% for foo in result.issue %}
-      <tr  >
-          <th  scope="row">{{loop.index}}</th>
-  
-          <td class="{{foo["severity"]}}level">{{ foo["severity"] }}</td>
-          <td>{{ foo["code"] }}</td>
-          <td>{{ foo["details"]["text"] }}</td>
-          {% for item in  foo.extension %}
-    {% if item.url == 'http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source' %}
-    <td>  {{ item.valueString }}</td>
-  
-    {% endif %}
-{% endfor %}
+                    <!-- File upload -->
+                    <label class="form-label" for="tgzFile">Ficheiro do pacote</label>
+                    <div class="file-upload-wrapper">
+                        <label class="file-upload-label" for="tgzFile">
+                            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            <span id="file-label-text">Clique para selecionar um ficheiro <strong>.tgz</strong></span>
+                        </label>
+                        <input type="file" id="tgzFile" name="tgzFile" accept=".tgz">
+                        <div id="file-name-display">Nenhum ficheiro selecionado</div>
+                    </div>
 
-      </tr>
-      {% endfor %}
-      </tbody>
-  </table>
-  
+                    <!-- OR separator -->
+                    <div class="d-flex align-items-center gap-3 my-3">
+                        <div style="flex:1;height:1px;background:var(--fhir-border)"></div>
+                        <span class="or-badge">ou</span>
+                        <div style="flex:1;height:1px;background:var(--fhir-border)"></div>
+                    </div>
 
-    </div>
+                    <!-- URL input -->
+                    <label class="form-label" for="detailInput">URL do IG</label>
+                    <input
+                        type="url"
+                        id="detailInput"
+                        name="detailInput"
+                        class="fhir-input"
+                        placeholder="https://packages.fhir.org/hl7.fhir.pt.core/1.0.0">
 
-  <br>
+                    <!-- Submit -->
+                    <div class="mt-4 d-flex justify-content-end">
+                        <button type="submit" class="btn-fhir-submit" id="submit-btn">
+                            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 15 15"/></svg>
+                            <span id="submit-label">Validar recurso</span>
+                            <span id="submit-spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        </button>
+                    </div>
 
-{% endif %}
-</div>  
+                </form>
+            </div>
+        </div>
 
+        <!-- Results -->
+        {% if result %}
+        <div class="fhir-card" id="results-section">
+            <div class="fhir-card-header">
+                <div class="card-icon" style="background:#198754">
+                    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                </div>
+                <h2>Resultado da validação</h2>
+            </div>
+            <div class="fhir-card-body">
 
-</body>
+                <!-- Summary pills -->
+                {% set ns = namespace(errors=0, warnings=0, infos=0) %}
+                {% for foo in result.issue %}
+                    {% if foo["severity"] == "error" or foo["severity"] == "fatal" %}
+                        {% set ns.errors = ns.errors + 1 %}
+                    {% elif foo["severity"] == "warning" %}
+                        {% set ns.warnings = ns.warnings + 1 %}
+                    {% else %}
+                        {% set ns.infos = ns.infos + 1 %}
+                    {% endif %}
+                {% endfor %}
+
+                <div class="results-summary">
+                    {% if ns.errors > 0 %}
+                    <span class="summary-pill pill-error">
+                        <svg style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                        {{ ns.errors }} erro{% if ns.errors != 1 %}s{% endif %}
+                    </span>
+                    {% endif %}
+                    {% if ns.warnings > 0 %}
+                    <span class="summary-pill pill-warning">
+                        <svg style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        {{ ns.warnings }} aviso{% if ns.warnings != 1 %}s{% endif %}
+                    </span>
+                    {% endif %}
+                    {% if ns.infos > 0 %}
+                    <span class="summary-pill pill-info">
+                        <svg style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        {{ ns.infos }} informaç{% if ns.infos != 1 %}ões{% else %}ão{% endif %}
+                    </span>
+                    {% endif %}
+                </div>
+
+                <!-- Table -->
+                <div style="overflow-x:auto">
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th class="row-num">#</th>
+                            <th>Severidade</th>
+                            <th>Código</th>
+                            <th>Detalhes</th>
+                            <th>Fonte</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for foo in result.issue %}
+                    <tr>
+                        <td class="row-num">{{ loop.index }}</td>
+                        <td>
+                            {% set sev = foo["severity"] %}
+                            {% if sev == "error" %}
+                            <span class="severity-badge badge-error">
+                                <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                                Erro
+                            </span>
+                            {% elif sev == "fatal" %}
+                            <span class="severity-badge badge-fatal">
+                                <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                Fatal
+                            </span>
+                            {% elif sev == "warning" %}
+                            <span class="severity-badge badge-warning">
+                                <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                Aviso
+                            </span>
+                            {% elif sev == "information" %}
+                            <span class="severity-badge badge-information">
+                                <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                Info
+                            </span>
+                            {% else %}
+                            <span class="severity-badge badge-information">{{ sev }}</span>
+                            {% endif %}
+                        </td>
+                        <td><span class="code-chip">{{ foo["code"] }}</span></td>
+                        <td>{{ foo["details"]["text"] }}</td>
+                        <td>
+                            {% for item in foo.extension %}
+                                {% if item.url == 'http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source' %}
+                                <span class="source-text">{{ item.valueString }}</span>
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+
+            </div>
+        </div>
+        {% endif %}
+
+    </div><!-- /page-wrapper -->
 
 <script>
+    // File name display
+    const tgzInput = document.getElementById('tgzFile');
+    const fileDisplay = document.getElementById('file-name-display');
+    const fileLabelText = document.getElementById('file-label-text');
 
+    tgzInput.addEventListener('change', function () {
+        if (this.files && this.files[0]) {
+            const name = this.files[0].name;
+            // Use textContent to avoid XSS via malicious filenames
+            fileDisplay.textContent = '✓ ' + name;
+            fileDisplay.classList.add('has-file');
+            const strong = document.createElement('strong');
+            strong.textContent = name;
+            fileLabelText.textContent = '';
+            fileLabelText.appendChild(strong);
+        } else {
+            fileDisplay.textContent = 'Nenhum ficheiro selecionado';
+            fileDisplay.classList.remove('has-file');
+            fileLabelText.textContent = 'Clique para selecionar um ficheiro ';
+            const strong = document.createElement('strong');
+            strong.textContent = '.tgz';
+            fileLabelText.appendChild(strong);
+        }
+    });
 
+    // Client-side validation: require file OR URL
+    const form = document.getElementById('validator-form');
+    const detailInput = document.getElementById('detailInput');
+    const submitBtn = document.getElementById('submit-btn');
+    const submitLabel = document.getElementById('submit-label');
+    const submitSpinner = document.getElementById('submit-spinner');
+
+    form.addEventListener('submit', function (e) {
+        const hasFile = tgzInput.files && tgzInput.files[0];
+        const hasUrl  = detailInput.value.trim() !== '';
+        if (!hasFile && !hasUrl) {
+            e.preventDefault();
+            tgzInput.setCustomValidity('Selecione um ficheiro .tgz ou indique um URL do IG.');
+            detailInput.setCustomValidity('Selecione um ficheiro .tgz ou indique um URL do IG.');
+            form.reportValidity();
+            return;
+        }
+        tgzInput.setCustomValidity('');
+        detailInput.setCustomValidity('');
+        submitBtn.disabled = true;
+        submitLabel.textContent = 'A validar…';
+        submitSpinner.classList.remove('d-none');
+    });
+
+    // Clear custom validity on input interaction
+    tgzInput.addEventListener('change', function () {
+        tgzInput.setCustomValidity('');
+        detailInput.setCustomValidity('');
+    });
+    detailInput.addEventListener('input', function () {
+        tgzInput.setCustomValidity('');
+        detailInput.setCustomValidity('');
+    });
+
+    // Scroll to results on page load if present (respects prefers-reduced-motion)
+    const resultsSection = document.getElementById('results-section');
+    if (resultsSection) {
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        resultsSection.scrollIntoView({
+            behavior: prefersReduced ? 'auto' : 'smooth',
+            block: 'start'
+        });
+    }
 </script>
 
+</body>
 </html>
-
-
