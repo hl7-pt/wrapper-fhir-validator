@@ -493,10 +493,11 @@
 }'></textarea>
 
                     <!-- IG section divider -->
-                    <div class="section-divider">Guia de Implementação (IG)</div>
+                    <div class="section-divider">Guia de Implementação (IG) — <em style="font-style:italic;font-weight:400;text-transform:none;letter-spacing:0">opcional</em></div>
+                    <p class="text-muted mb-3" style="font-size:0.82rem">Pode validar sem especificar um IG. Se pretender validar contra um Guia de Implementação, forneça o ficheiro <strong>.tgz</strong> ou indique o URL do pacote.</p>
 
                     <!-- File upload -->
-                    <label class="form-label" for="tgzFile">Ficheiro do pacote</label>
+                    <label class="form-label" for="tgzFile">Ficheiro do pacote <span class="label-hint">— opcional</span></label>
                     <div class="file-upload-wrapper">
                         <label class="file-upload-label" for="tgzFile">
                             <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
@@ -514,7 +515,7 @@
                     </div>
 
                     <!-- URL input -->
-                    <label class="form-label" for="detailInput">URL do IG</label>
+                    <label class="form-label" for="detailInput">URL do IG <span class="label-hint">— opcional</span></label>
                     <input
                         type="url"
                         id="detailInput"
@@ -668,7 +669,7 @@
         }
     });
 
-    // Client-side validation: require file OR URL
+    // Submit handler: show loading state
     const form = document.getElementById('validator-form');
     const detailInput = document.getElementById('detailInput');
     const submitBtn = document.getElementById('submit-btn');
@@ -676,15 +677,6 @@
     const submitSpinner = document.getElementById('submit-spinner');
 
     form.addEventListener('submit', function (e) {
-        const hasFile = tgzInput.files && tgzInput.files[0];
-        const hasUrl  = detailInput.value.trim() !== '';
-        if (!hasFile && !hasUrl) {
-            e.preventDefault();
-            tgzInput.setCustomValidity('Selecione um ficheiro .tgz ou indique um URL do IG.');
-            detailInput.setCustomValidity('Selecione um ficheiro .tgz ou indique um URL do IG.');
-            form.reportValidity();
-            return;
-        }
         tgzInput.setCustomValidity('');
         detailInput.setCustomValidity('');
         submitBtn.disabled = true;
