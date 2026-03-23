@@ -27,8 +27,10 @@ def validating_resource(file, ig, temp_folder):
         "-jar",
         jar_path,
         file,
-        "-ig",
-        ig,
+    ]
+    if ig:
+        command += ["-ig", ig]
+    command += [
         "-output",
         temp_folder + "/output.json",
         "-output-style",
@@ -57,14 +59,20 @@ def hello():
         with open(json_file_path, "w") as json_file:
             json_file.write(json_data)
 
-        # Get uploaded .tgz file
+        # Get uploaded .tgz file or URL for the IG parameter
+        ig_param = None
         uploaded_file = request.files.get("tgzFile")
         print(uploaded_file)
         if uploaded_file and uploaded_file.filename.endswith(".tgz"):
             tgz_file_path = os.path.join(temp_dir, uploaded_file.filename)
             uploaded_file.save(tgz_file_path)
-        print(json_file_path, tgz_file_path)
-        outcome = validating_resource(json_file_path, tgz_file_path, temp_dir)
+            ig_param = tgz_file_path
+        else:
+            ig_url = request.form.get("detailInput", "").strip()
+            if ig_url:
+                ig_param = ig_url
+        print(json_file_path, ig_param)
+        outcome = validating_resource(json_file_path, ig_param, temp_dir)
         file = outcome["file"]
         with open(file, "r", encoding="utf-8") as file:
             result = json.load(file)
